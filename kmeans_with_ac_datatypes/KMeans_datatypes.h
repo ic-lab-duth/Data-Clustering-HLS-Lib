@@ -69,12 +69,14 @@ private:
     DIST_TYPE min_dist = 0.0;
     CLTID_TYPE best_cl_id = points[pnt_id].id_cluster;
     DIST_TYPE dist = 0.0;
+    bool first_check=true;
     for (const auto& cl : clusters) {
       dist = calculate_dist(cl.id, pnt_id);
 
-      if (dist < min_dist || min_dist == 0.0) {
+      if (dist < min_dist || first_check) {
         min_dist = dist;
         best_cl_id = cl.id;
+        first_check = false;
       }
     }
     return best_cl_id;
