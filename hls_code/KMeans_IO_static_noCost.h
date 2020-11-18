@@ -40,8 +40,7 @@ private:
     return dist;
   };
 
-  bool assign_points_to_clusters(P_TYPE points[N], DIST_TYPE &new_cost) {
-    DIST_TYPE cost = 0.0;
+  bool assign_points_to_clusters(P_TYPE points[N]) {
 
     bool keep_going = false;
 
@@ -50,7 +49,7 @@ private:
 
     for (int i=0; i<N; i++) {
       CID_TYPE curr_cl_id = points[i].id_cluster;
-      CID_TYPE new_cl_id = get_nearest_center(points[i], cost);
+      CID_TYPE new_cl_id = get_nearest_center(points[i]);
 
       if (new_cl_id != curr_cl_id) {
         keep_going = true;
@@ -62,11 +61,10 @@ private:
         new_coord[new_cl_id][j] += points[i].coord[j];
       }
     }
-    new_cost = cost;
     return keep_going;
   };
 
-  CID_TYPE get_nearest_center(P_TYPE pnt, DIST_TYPE &cost) {
+  CID_TYPE get_nearest_center(P_TYPE pnt) {
     DIST_TYPE min_dist = 0.0;
     CID_TYPE best_cl_id = pnt.id_cluster; 
     DIST_TYPE dist = 0.0;
@@ -80,7 +78,6 @@ private:
         first_check = false;
       }
     }
-    cost += min_dist;
     return best_cl_id;
   };
    
@@ -108,9 +105,6 @@ public:
   ~KMeans_IO() {};
     
   void run(P_TYPE points[N], CENTER_T clusters_centers[K]) {
-    DIST_TYPE old_cost = 0.0;
-    DIST_TYPE new_cost = 0.0;
-    DIST_TYPE diff = 0.0;
 
     // DO JOB
     initialize_clusters(points);
@@ -118,14 +112,9 @@ public:
     int iter = 0;
     bool keep_going = true;
     while ((iter <= MAX_ITER) && keep_going) {
-      keep_going = assign_points_to_clusters(points, new_cost);
+      keep_going = assign_points_to_clusters(points);
       update_cluster_center();
 
-      diff = absolute_diff(old_cost, new_cost);
-      if (diff < 0.00001) {
-          break;
-      }
-      old_cost = new_cost;
       iter++;
     }
     

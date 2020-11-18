@@ -103,28 +103,22 @@ struct point {
   PID_TYPE id;          // id of the point
   CID_TYPE id_cluster;  // id of the cluster that this point belongs to
 
-  COORD_TYPE x;
-  COORD_TYPE y;
+  COORD_TYPE coord[DIM];
 
-  point() : id(0), id_cluster(0), x(0.0), y(0.0) {}
 };
 
 template<int DIM>
 struct cluster {
   CID_TYPE id;
 
-  COORD_TYPE x;
-  COORD_TYPE y;
+  COORD_TYPE coord[DIM];
 
-  cluster() : id(0), x(0.0), y(0.0) {}
 };
 
 template<int DIM>
 struct center {
-  COORD_TYPE x;
-  COORD_TYPE y;
+  COORD_TYPE coord[DIM];
 
-  center() : x(0.0), y(0.0) {}
 };
 
 typedef point<DATA_DIM> P_TYPE;

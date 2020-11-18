@@ -12,7 +12,7 @@
 #include <algorithm>
 
 #include "KMeans_basic.h"
-#include "KMeans_ΙΟ_static.h"
+#include "KMeans_IO_static.h"
 
 #include <ac_channel.h>
 #include <ac_math.h>
@@ -118,7 +118,7 @@ void extract_data(P_TYPE km_io_points[N_POINTS], CENTER_T km_io_centers_2_tb[K_C
   CENTER_T tmp_center;
   for (int i=0; i<K_CLSTRS; i++) {
   tmp_center = km_io_centers_2_tb[i];
-  km_io_centers.push_back(std::make_pair(tmp_center.x.to_double(), tmp_center.y.to_double()));
+  km_io_centers.push_back(std::make_pair(tmp_center.coord[0].to_double(), tmp_center.coord[1].to_double()));
   }
 
   for (int i=0; i< N_POINTS; i++) {
@@ -293,15 +293,15 @@ int main(int argc, char *argv[]) {
     /*
     * Version with defined IOs
     */
-    KMeans_IO<K_CLSTRS, N_POINTS, M_ITERAT> km_io;
+    KMeans_IO<K_CLSTRS, N_POINTS, DATA_DIM, M_ITERAT> km_io;
     
     CENTER_T km_io_centers_2_tb[K_CLSTRS];
     P_TYPE km_io_points[N_POINTS];
 
     int id = 0;
     for (auto pnt : km_dt_data) {
-      km_io_points[id].x = pnt.first;
-      km_io_points[id].y = pnt.second;
+      km_io_points[id].coord[0] = pnt.first;
+      km_io_points[id].coord[1] = pnt.second;
       km_io_points[id].id = id;
       id++;
     }
