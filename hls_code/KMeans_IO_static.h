@@ -2,68 +2,25 @@
 #define K_MEANS_IO_STATIC_H
 
 #include "datatypes_spec.h"
-#include <array>
+#include <mc_scverify.h>
 
+#pragma hls_design
 template<int K, int N, int DIM, int MAX_ITER>
-class KMeans_IO {
+class KMEANS {
 private:
   std::array<C_TYPE,K> clusters;
 
-  // ACCU_TYPE new_coord[K][DIM];
-  // COUNTER_TYPE c_points[K];
   std::array<std::array<ACCU_TYPE, DIM>, K> new_coord;
   std::array<COUNTER_TYPE, K> c_points;
-
-  void initialize_clusters(P_TYPE points[N]) {
-    for (int i = 0; i < K; i++) {
-      C_TYPE cl;
-      cl.id = (CID_TYPE)i;
-
-      // int indx = rand()%(int)N_POINTS;
-      int indx = i;
-      
-      for (int j=0; j<DIM; j++) {
-        cl.coord[j] = points[indx].coord[j];
-      }
-      
-      clusters[i] = cl;
-    }
-  };
 
   DIST_TYPE calculate_dist(CID_TYPE cl_id, P_TYPE pnt) {
     DIST_TYPE dist = 0;
     
     for (int i=0; i<DIM; i++) {
-      dist += (pnt.coord[i] - clusters[cl_id].coord[i])*(pnt.coord[i] - clusters[cl_id].coord[i]);
+      dist += (pnt.coord[i] - clusters[cl_id][i])*(pnt.coord[i] - clusters[cl_id][i]);
     }
     
     return dist;
-  };
-
-  bool assign_points_to_clusters(P_TYPE points[N], DIST_TYPE &new_cost) {
-    DIST_TYPE cost = 0.0;
-
-    bool keep_going = false;
-
-    ac::init_array<AC_VAL_0>(&new_coord[0][0], K*DIM);
-    ac::init_array<AC_VAL_0>(&c_points[0], K);
-
-    for (int i=0; i<N; i++) {
-      CID_TYPE curr_cl_id = points[i].id_cluster;
-      CID_TYPE new_cl_id = get_nearest_center(points[i], cost);
-
-      if (new_cl_id != curr_cl_id) {
-        keep_going = true;
-        points[i].id_cluster = new_cl_id;
-      }
-      
-      c_points[new_cl_id]++;
-      for (int j=0; j<DIM; j++) {
-        new_coord[new_cl_id][j] += points[i].coord[j];
-      }
-    }
-    new_cost = cost;
-    return keep_going;
   };
 
   CID_TYPE get_nearest_center(P_TYPE pnt, DIST_TYPE &cost) {
@@ -72,11 +29,11 @@ private:
     DIST_TYPE dist = 0.0;
     bool first_check = true;
     for (int i=0; i<K; i++) {
-      dist = calculate_dist(clusters[i].id, pnt);
+      dist = calculate_dist((CID_TYPE)i, pnt);
 
       if (dist < min_dist || first_check) {
         min_dist = dist;
-        best_cl_id = clusters[i].id;
+        best_cl_id = (CID_TYPE)i;
         first_check = false;
       }
     }
@@ -89,7 +46,7 @@ private:
 
     for (int i=0; i<K; i++) {
       for (int j=0; j<DIM; j++) {
-        clusters[i].coord[j] = new_coord[i][j] / c_points[i];
+        ac_math::ac_div(new_coord[i][j], c_points[i], clusters[i][j]);
       }
     }
 
@@ -104,21 +61,51 @@ private:
   };
 
 public:
-  KMeans_IO() {};
-  ~KMeans_IO() {};
-    
-  void run(P_TYPE points[N], CENTER_T clusters_centers[K]) {
+  KMEANS() {};
+  ~KMEANS() {};
+  
+  #pragma hls_design interface  
+  void CCS_BLOCK(run) (P_TYPE points[N], C_TYPE clusters_centers[K]) {
     DIST_TYPE old_cost = 0.0;
     DIST_TYPE new_cost = 0.0;
     DIST_TYPE diff = 0.0;
 
     // DO JOB
-    initialize_clusters(points);
+    INIT_CLUSTERS: for (int i = 0; i < K; i++) {
+      
+      DATA_DIM_1: for (int j=0; j<DIM; j++) {
+        clusters[i][j] = points[i].coord[j];
+      }
+    }
 
     int iter = 0;
     bool keep_going = true;
     while ((iter <= MAX_ITER) && keep_going) {
-      keep_going = assign_points_to_clusters(points, new_cost);
+      
+      DIST_TYPE cost = 0.0;
+
+      keep_going = false;
+
+      ac::init_array<AC_VAL_0>(&new_coord[0][0], K*DIM);
+      ac::init_array<AC_VAL_0>(&c_points[0], K);
+
+      ASSIGN_POINT_to_CLUSTER: for (int i=0; i<N; i++) {
+        P_TYPE curr_pnt = points[i];
+        CID_TYPE new_cl_id = get_nearest_center(curr_pnt, cost);
+
+        c_points[new_cl_id]++;
+        DATA_DIM_2: for (int j=0; j<DIM; j++) {
+          new_coord[new_cl_id][j] += curr_pnt.coord[j];
+        }
+
+        if (new_cl_id != curr_pnt.id_cluster) {
+          keep_going = true;
+          points[i].id_cluster = new_cl_id;
+        }
+      }
+      new_cost = cost;
+
+
       update_cluster_center();
 
       diff = absolute_diff(old_cost, new_cost);
@@ -131,9 +118,9 @@ public:
     
 
     // WRITE
-    for (int i=0; i<K; i++) {
-      for (int j=0; j<DIM; j++) {
-        clusters_centers[i].coord[j] = clusters[i].coord[j];
+    WRITE_OUTPUT: for (int i=0; i<K; i++) {
+      DATA_DIM_3: for (int j=0; j<DIM; j++) {
+        clusters_centers[i][j] = clusters[i][j];
       }
     }
     
