@@ -37,7 +37,7 @@ CCS_MAIN(int argc, char *argv[]) {
   std::string method = "";
   
 
-  int number_of_tests = 2;
+  int number_of_tests = 1;
 
   for (int test = 0; test<number_of_tests; test++) {
 

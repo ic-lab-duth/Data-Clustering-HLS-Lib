@@ -12,7 +12,7 @@
 const int M_ITERAT = 100;   // define max run iterations
 
 const int DATA_DIM = 2;     // define dimensionality of data (x,y,z,...)
-const int N_POINTS = 50;  // define amount of points
+const int N_POINTS = 100;  // define amount of points
 const int K_CLSTRS = 3;     // define amount of clusters
 
 const int MAX_VALUE = 390892;

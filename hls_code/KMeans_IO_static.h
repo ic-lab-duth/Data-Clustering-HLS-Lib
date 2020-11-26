@@ -16,7 +16,7 @@ private:
   DIST_TYPE calculate_dist(CID_TYPE cl_id, P_TYPE pnt) {
     DIST_TYPE dist = 0;
     
-    for (int i=0; i<DIM; i++) {
+    CALC_DIST: for (int i=0; i<DIM; i++) {
       dist += (pnt.coord[i] - clusters[cl_id][i])*(pnt.coord[i] - clusters[cl_id][i]);
     }
     
@@ -28,7 +28,7 @@ private:
     CID_TYPE best_cl_id = pnt.id_cluster; 
     DIST_TYPE dist = 0.0;
     bool first_check = true;
-    for (int i=0; i<K; i++) {
+    FIND_NEAR_CENT: for (int i=0; i<K; i++) {
       dist = calculate_dist((CID_TYPE)i, pnt);
 
       if (dist < min_dist || first_check) {
@@ -44,8 +44,8 @@ private:
 
   void update_cluster_center() {
 
-    for (int i=0; i<K; i++) {
-      for (int j=0; j<DIM; j++) {
+    UPD_CLUST: for (int i=0; i<K; i++) {
+      DATA_DIM_2: for (int j=0; j<DIM; j++) {
         ac_math::ac_div(new_coord[i][j], c_points[i], clusters[i][j]);
       }
     }
@@ -71,8 +71,7 @@ public:
     DIST_TYPE diff = 0.0;
 
     // DO JOB
-    INIT_CLUSTERS: for (int i = 0; i < K; i++) {
-      
+    INIT_CLUST: for (int i = 0; i < K; i++) {
       DATA_DIM_1: for (int j=0; j<DIM; j++) {
         clusters[i][j] = points[i].coord[j];
       }
@@ -85,16 +84,18 @@ public:
       DIST_TYPE cost = 0.0;
 
       keep_going = false;
-
-      ac::init_array<AC_VAL_0>(&new_coord[0][0], K*DIM);
+      
+      INIT_CNTR_ACC: for (int i=0; i<K; i++) {
+        ac::init_array<AC_VAL_0>(&new_coord[i][0], DIM);
+      }
       ac::init_array<AC_VAL_0>(&c_points[0], K);
 
-      ASSIGN_POINT_to_CLUSTER: for (int i=0; i<N; i++) {
+      ASGN_TO_CLUST: for (int i=0; i<N; i++) {
         P_TYPE curr_pnt = points[i];
         CID_TYPE new_cl_id = get_nearest_center(curr_pnt, cost);
 
         c_points[new_cl_id]++;
-        DATA_DIM_2: for (int j=0; j<DIM; j++) {
+        ACC_NEW_CNTR: for (int j=0; j<DIM; j++) {
           new_coord[new_cl_id][j] += curr_pnt.coord[j];
         }
 
