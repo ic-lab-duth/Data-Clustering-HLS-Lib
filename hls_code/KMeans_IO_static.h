@@ -13,23 +13,20 @@ private:
   std::array<std::array<ACCU_TYPE, DIM>, K> new_coord;
   std::array<COUNTER_TYPE, K> c_points;
 
-  DIST_TYPE calculate_dist(CID_TYPE cl_id, P_TYPE pnt) {
-    DIST_TYPE dist = 0;
-    
-    CALC_DIST: for (int i=0; i<DIM; i++) {
-      dist += (pnt.coord[i] - clusters[cl_id][i])*(pnt.coord[i] - clusters[cl_id][i]);
-    }
-    
-    return dist;
-  };
-
   CID_TYPE get_nearest_center(P_TYPE pnt, DIST_TYPE &cost) {
     DIST_TYPE min_dist = 0.0;
     CID_TYPE best_cl_id = pnt.id_cluster; 
-    DIST_TYPE dist = 0.0;
     bool first_check = true;
-    FIND_NEAR_CENT: for (int i=0; i<K; i++) {
-      dist = calculate_dist((CID_TYPE)i, pnt);
+    FIND_NEAR_CENT: for (CID_TYPE i=0; i<K; i++) {
+    
+      DIST_TYPE dist = 0.0;
+      
+      // COORD_TYPE pnt_diff;
+      CALC_DIST: for (int j=0; j<DIM; j++) {
+        // ac_math::ac_abs(pnt.coord[j] - clusters[i][j], pnt_diff);
+        // dist += pnt_diff*pnt_diff;
+        dist += (pnt.coord[j] - clusters[i][j])*(pnt.coord[j] - clusters[i][j]);
+      }
 
       if (dist < min_dist || first_check) {
         min_dist = dist;
@@ -52,13 +49,6 @@ private:
 
   };
 
-  DIST_TYPE absolute_diff (DIST_TYPE x, DIST_TYPE y) {
-    if (x > y) {
-      return x - y;
-    } else {
-      return y - x;
-    }
-  };
 
 public:
   KMEANS() {};
@@ -109,7 +99,7 @@ public:
 
       update_cluster_center();
 
-      diff = absolute_diff(old_cost, new_cost);
+      ac_math::ac_abs(old_cost - new_cost, diff);
       if (diff < 0.00001) {
           break;
       }
