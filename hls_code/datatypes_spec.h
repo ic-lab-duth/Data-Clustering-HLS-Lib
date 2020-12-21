@@ -9,21 +9,21 @@
 /*
 *   PARAMETERS
 */
-const int M_ITERAT = 100;   // define max run iterations
+const int M_ITERAT = 200;   // define max run iterations
 
 const int DATA_DIM = 2;     // define dimensionality of data (x,y,z,...)
-const int N_POINTS = 100;  // define amount of points
-const int K_CLSTRS = 3;     // define amount of clusters
+const int N_POINTS = 10000;  // define amount of points
+const int K_CLSTRS = 20;     // define amount of clusters
 
-const int MAX_VALUE = 390892;
-const int MIN_VALUE = 139779;
-const int GRANULARITY = 1;
+const int MAX_VALUE = 100000;
+const int MIN_VALUE = 0;
+const int GRANULARITY = 0;
 
 /*
 * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 *
 * END OF PARAMETER DECLARATION 
-* (do not make changeσ το the rest of the document)
+* (do not make changes το the rest of the document)
 *
 * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
@@ -43,7 +43,7 @@ struct COORDINATES_DATATYPE_INITIALIZATION {
 template<const int MAX_V, const int MIN_V, const int N, const int G>
 struct DISTANCE_DATATYPE_INITIALIZATION {
   static const bool sign = false;
-  static const int i_bits = 2 * ac::nbits<MAX_V-MIN_V>::val + ac::nbits<N>::val;
+  static const int i_bits = DATA_DIM * ac::nbits<MAX_V-MIN_V>::val + ac::nbits<N>::val;
   static const int bits = (sign) ? i_bits + G + 1 : i_bits + G;
   
 };
@@ -59,7 +59,6 @@ template<const int X>
 struct CALCULATE_LOG2 {
   static const int bits = ac::nbits<X>::val;
 };
-
 
 /*
 *   AUTO CALCULATED VALUES
@@ -83,14 +82,11 @@ static const int ACC_SIGNEDNESS = ACCUMULATOR_DATATYPE_INITIALIZATION<MAX_VALUE,
 /*
 *   MAIN DATATYPES DEFINITION
 */
-typedef ac_int<CID_BITS, false> CID_TYPE;       // Define size of data type for cluster IDs
-
-// typedef ac_int<PID_BITS, false> COUNTER_TYPE;   // datatype for the counter variables (used to count the amount of points in each cluster
-typedef ac_fixed<PID_BITS, PID_BITS, false, AC_TRN, AC_SAT> COUNTER_TYPE;   // datatype for the counter variables (used to count the amount of points in each cluster)
-
-typedef ac_fixed<COORD_BITS, COORD_I_BITS, COORD_SIGNEDNESS, AC_TRN, AC_SAT> COORD_TYPE; // datatype for the points' coordinates variables
-typedef ac_fixed<DIST_BITS, DIST_I_BITS, DIST_SIGNEDNESS, AC_TRN, AC_SAT>    DIST_TYPE;  // datatype for distance and cost variables
-typedef ac_fixed<ACC_BITS, ACC_I_BITS, ACC_SIGNEDNESS, AC_TRN, AC_SAT>       ACCU_TYPE;  // datatype for the accumulators variables (used to update C centers)
+typedef ac_int<CID_BITS, false>                                              CID_TYPE;     // Define size of data type for cluster IDs
+typedef ac_fixed<PID_BITS, PID_BITS, false, AC_TRN, AC_SAT>                  COUNTER_TYPE; // datatype for the counter variables (used to count the amount of points in each cluster)
+typedef ac_fixed<COORD_BITS, COORD_I_BITS, COORD_SIGNEDNESS, AC_TRN, AC_SAT> COORD_TYPE;   // datatype for the points' coordinates variables
+typedef ac_fixed<DIST_BITS, DIST_I_BITS, DIST_SIGNEDNESS, AC_TRN, AC_SAT>    DIST_TYPE;    // datatype for distance and cost variables
+typedef ac_fixed<ACC_BITS, ACC_I_BITS, ACC_SIGNEDNESS, AC_TRN, AC_SAT>       ACCU_TYPE;    // datatype for the accumulators variables (used to update C centers)
 
 
 template<int DIM>
@@ -99,9 +95,32 @@ struct point {
 
   COORD_TYPE coord[DIM];
 
+  DIST_TYPE u;
+  DIST_TYPE l[K_CLSTRS];
+  DIST_TYPE lHam;
 };
 
 typedef point<DATA_DIM> P_TYPE;
 typedef std::array<COORD_TYPE, DATA_DIM> C_TYPE;
+
+
+
+
+/*
+*  CSR datatypes
+*/
+
+static const int POS_SIZE = (1<<COORD_I_BITS) + 1;
+
+template<int DIM>
+struct CSR_point {
+  CID_TYPE id_cluster;  
+
+  COORD_TYPE coord[DIM-1];
+};
+
+typedef point<DATA_DIM> CSR_CRD_P_TYPE;
+typedef ac_int<PID_BITS, false> CSR_POS_P_TYPE;
+
 
 #endif
