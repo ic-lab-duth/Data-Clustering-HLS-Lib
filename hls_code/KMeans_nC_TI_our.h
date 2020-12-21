@@ -12,9 +12,11 @@ private:
 
   std::array<std::array<ACCU_TYPE, DIM>, K> new_coord;
   std::array<COUNTER_TYPE, K> c_points;
-
+  
   // TB
+  #ifndef __SYNTHESIS__
   int cnt_calc;
+  #endif
 
   CID_TYPE get_nearest_center(P_TYPE pnt, bool initial) {
     DIST_TYPE min_dist = 0.0;
@@ -29,7 +31,9 @@ private:
       min_dist += (pnt.coord[j] - clusters[best_cl_id][j])*(pnt.coord[j] - clusters[best_cl_id][j]);
       sum1 += clusters[best_cl_id][j];
     }
+    #ifndef __SYNTHESIS__
     cnt_calc++;
+    #endif
 
 
     FIND_NEAR_CENT: for (int i=0; i<K; i++) {
@@ -49,7 +53,9 @@ private:
           CALC_DIST: for (int j=0; j<DIM; j++) {
             dist += (pnt.coord[j] - clusters[i][j])*(pnt.coord[j] - clusters[i][j]);
           }
+          #ifndef __SYNTHESIS__
           cnt_calc++;
+          #endif
           
           if (dist < min_dist) {
             min_dist = dist;
@@ -77,7 +83,11 @@ private:
   };
 
 public:
-  KMEANS_OUR() { cnt_calc = 0; };
+  KMEANS_OUR() {
+    #ifndef __SYNTHESIS__ 
+    cnt_calc = 0; 
+    #endif
+  };
   ~KMEANS_OUR() {};
     
   #pragma hls_design interface  
@@ -128,8 +138,10 @@ public:
         clusters_centers[i][j] = clusters[i][j];
       }
     }
+    #ifndef __SYNTHESIS__
     std::cout << "OursIneq: Caclulation -> " << cnt_calc << std::endl;
     std::cout << " \t  Iterations -> " << iter << std::endl;
+    #endif
 
   }; // end run
 }; // end class
