@@ -42,7 +42,7 @@ private:
         } 
 
 
-        if ( (sum1-sum2).to_double()*(sum1-sum2).to_double() < 8*min_dist.to_double()) {
+        if ( (sum1-sum2)*(sum1-sum2) < 8*min_dist) {
       
           DIST_TYPE dist = 0.0;
 
