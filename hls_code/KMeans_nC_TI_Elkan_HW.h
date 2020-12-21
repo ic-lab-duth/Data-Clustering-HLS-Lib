@@ -16,7 +16,9 @@ private:
   std::array<DIST_TYPE,K> min_dist_cent;
 
   // TB
+  #ifndef __SYNTHESIS__
   int cnt_calc;
+  #endif
 
   CID_TYPE get_nearest_center(P_TYPE pnt, bool initial) {
     DIST_TYPE min_dist = 0.0;
@@ -35,7 +37,9 @@ private:
           // dist += pnt_diff*pnt_diff;
           dist += (pnt.coord[j] - clusters[i][j])*(pnt.coord[j] - clusters[i][j]);
         }
+        #ifndef __SYNTHESIS__
         cnt_calc++;
+        #endif
         
         if (dist < min_dist || first_check) {
           min_dist = dist;
@@ -49,7 +53,9 @@ private:
       for (int j=0; j<DIM; j++) {
         min_dist += (pnt.coord[j] - clusters[pnt.id_cluster][j])*(pnt.coord[j] - clusters[pnt.id_cluster][j]);
       }
+      #ifndef __SYNTHESIS__
       cnt_calc++;
+      #endif
       
       DIST_TYPE tmp1, tmp2;
       ac_math::ac_sqrt(min_dist, tmp1);
@@ -70,7 +76,9 @@ private:
               // dist += pnt_diff*pnt_diff;
               dist += (pnt.coord[j] - clusters[i][j])*(pnt.coord[j] - clusters[i][j]);
             }
+            #ifndef __SYNTHESIS__
             cnt_calc++;
+            #endif
             
             if (dist < min_dist) {
               min_dist = dist;
@@ -98,7 +106,11 @@ private:
   };
 
 public:
-  KMEANS_E_HW() { cnt_calc = 0; };
+  KMEANS_E_HW() { 
+    #ifndef __SYNTHESIS__
+    cnt_calc = 0; 
+    #endif
+  };
   ~KMEANS_E_HW() {};
     
   #pragma hls_design interface  
@@ -169,8 +181,10 @@ public:
         clusters_centers[i][j] = clusters[i][j];
       }
     }
+    #ifndef __SYNTHESIS__
     std::cout << "Elkan_HW: Caclulation -> " << cnt_calc << std::endl;
     std::cout << " \t  Iterations -> " << iter << std::endl;
+    #endif
 
   }; // end run
 }; // end class
