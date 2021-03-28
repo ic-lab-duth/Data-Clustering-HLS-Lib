@@ -38,9 +38,11 @@ We can observe this difference due to our C++ implementation. Maybe with a diffe
 
 **Sources**: C++ implementation of K-Means, Mean Shift, DBScan and Affinity Propagation.
 
-**kmeans_with_ac_datatypes**: Contains the same K-Means implementation with the one in *sources* folder implemented with ac datatypes.
+**hls_code**: HLS ready C++ code for each algorithm
 
-**hls_code**: K-Means implementation with static structures. The testbench here is used to compare the output with our baseline version of C++ code.
+**testbenches:** C++ and HLS testbech for each algorithm
 
-**hls_code_for_image_tb**: Ready for Catapult. The testbench here is used to group the colors of an image into K clusters and recreate the image using these K colors.
+**datasets:** Collection of self generated datasets.
+
+**sparse_dataset_generator:** Generator of sparse datasets. 
 
